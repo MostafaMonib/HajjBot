@@ -1,60 +1,1 @@
-﻿using System.Net;
-using System.Net.Http;
-using System.Threading.Tasks;
-using System.Web.Http;
-using Microsoft.Bot.Builder.Dialogs;
-using Microsoft.Bot.Connector;
-
-namespace HajjBot
-{
-    [BotAuthentication]
-    public class MessagesController : ApiController
-    {
-        /// <summary>
-        /// POST: api/Messages
-        /// Receive a message from a user and reply to it
-        /// </summary>
-        public async Task<HttpResponseMessage> Post([FromBody]Activity activity)
-        {
-            if (activity.Type == ActivityTypes.Message)
-            {
-                await Conversation.SendAsync(activity, () => new Dialogs.RootDialog());
-            }
-            else
-            {
-                HandleSystemMessage(activity);
-            }
-            var response = Request.CreateResponse(HttpStatusCode.OK);
-            return response;
-        }
-
-        private Activity HandleSystemMessage(Activity message)
-        {
-            if (message.Type == ActivityTypes.DeleteUserData)
-            {
-                // Implement user deletion here
-                // If we handle user deletion, return a real message
-            }
-            else if (message.Type == ActivityTypes.ConversationUpdate)
-            {
-                // Handle conversation state changes, like members being added and removed
-                // Use Activity.MembersAdded and Activity.MembersRemoved and Activity.Action for info
-                // Not available in all channels
-            }
-            else if (message.Type == ActivityTypes.ContactRelationUpdate)
-            {
-                // Handle add/remove from contact lists
-                // Activity.From + Activity.Action represent what happened
-            }
-            else if (message.Type == ActivityTypes.Typing)
-            {
-                // Handle knowing tha the user is typing
-            }
-            else if (message.Type == ActivityTypes.Ping)
-            {
-            }
-
-            return null;
-        }
-    }
-}
+﻿using Autofac; using BotSession; using HajjBot; using Microsoft.Bot.Builder.Dialogs; using Microsoft.Bot.Builder.Dialogs.Internals; using Microsoft.Bot.Connector; using HajjBot.Helper; using SpeechToText.Services; using System; using System.Linq; using System.Net; using System.Net.Http; using System.Threading; using System.Threading.Tasks; using System.Web.Http;  namespace HajjBot {     [BotAuthentication]     public class MessagesController : ApiController     {         /// <summary>         /// POST: api/Messages         /// Receive a message from a user and reply to it         /// </summary>         ///          public async Task<HttpResponseMessage> Post([FromBody]Activity activity)         {             Common.CommonConversation.CurrentActivity = activity;             Common.CommonConversation.Connector = new ConnectorClient(new Uri(activity.ServiceUrl));              if (activity.Type == ActivityTypes.Message)             {                  var oggAudioAttachment = activity.Attachments?.FirstOrDefault(a => a.ContentType.Equals("audio/ogg") || a.ContentType.Equals("application/octet-stream"));                  if (oggAudioAttachment != null)                 {                     var connector = Common.CommonConversation.Connector;                     MicrosoftCognitiveSpeechService speechService = new MicrosoftCognitiveSpeechService();                      var stream = await new HajjHelper().GetAudioStream(connector, oggAudioAttachment);                     var text = await speechService.GetTextFromAudioAsync(stream);                       Activity reply = activity.CreateReply(                         $"The Retruned from Microsoft Cognitive Speech Service was {text}");                      await connector.Conversations.ReplyToActivityAsync(reply);                      text = text.Replace(".", string.Empty).Trim();                      activity.Text = text;                   }                  var dictionary = SessionTimeouter.Dictionary;                  var key = activity.ChannelId + activity.From.Id + activity.Conversation.Id;                  SessionTimeouter timeouter = null;                  int millisecondsTime = 1000 * 60 * 5;                  if (dictionary.ContainsKey(key))                 {                     timeouter = dictionary[key];                     timeouter.Reset();                 }                 else                 {                     timeouter = new SessionTimeouter(key, activity, millisecondsTime);                     timeouter.SetNewSession(millisecondsTime);                     dictionary.Add(key, timeouter);                 }                  string msg = activity.Text.ToLower().Trim();                 if (msg == "start over" || msg == "exit" || msg == "quit" || msg == "done" || msg == "start again" || msg == "restart" || msg == "leave" || msg == "reset")                 {                     await Reset(activity);                 }                 else                 {                     await Task.Factory.StartNew(async () => await Conversation.SendAsync(activity, MakeDeviceOrderDialog));                 }               }             else             {                 await HandleSystemMessageAsync(activity);             }               var response = Request.CreateResponse(HttpStatusCode.OK);             return response;         }          private ConversationStarter GetConversationStarter(Activity message)         {             ConversationStarter cs = new ConversationStarter();             cs.toId = message.From.Id;             cs.toName = message.From.Name;             cs.fromId = message.Recipient.Id;             cs.fromName = message.Recipient.Name;             cs.serviceUrl = message.ServiceUrl;             cs.channelId = message.ChannelId;             cs.conversationId = message.Conversation.Id;              return cs;         }          private static IDialog<HajjBot.Forms.HajjChecker> MakeDeviceOrderDialog()         {             return Chain.From(() => Microsoft.Bot.Builder.FormFlow.FormDialog.FromForm(HajjBot.Forms.HajjChecker.BuildForm));         }          private async Task<Activity> HandleSystemMessageAsync(Activity message)         {             if (message.Type == ActivityTypes.DeleteUserData)             {                 // Implement user deletion here                 // If we handle user deletion, return a real message             }             else if (message.Type == ActivityTypes.ConversationUpdate)             {                 if (message.MembersAdded.Any(o => o.Id == message.Recipient.Id))                 {                     var reply = message.CreateReply("اهلا و مرحبا بك في الحج بوت");                      ConnectorClient connector = new ConnectorClient(new Uri(message.ServiceUrl));                      await connector.Conversations.ReplyToActivityAsync(reply);                 }             }             else if (message.Type == ActivityTypes.ContactRelationUpdate)             {                 // Handle add/remove from contact lists                 // Activity.From + Activity.Action represent what happened             }             else if (message.Type == ActivityTypes.Typing)             {                 // Handle knowing tha the user is typing             }             else if (message.Type == ActivityTypes.Ping)             {             }              return null;         }          private async Task Reset(Activity activity)         {             //await activity.GetStateClient().BotState             //    .DeleteStateForUserWithHttpMessagesAsync(activity.ChannelId, activity.From.Id);              using (var scope = DialogModule.BeginLifetimeScope(Conversation.Container, activity))             {                 var botData = scope.Resolve<IBotData>();                 await botData.LoadAsync(default(CancellationToken));                 var stack = scope.Resolve<IDialogStack>();                 stack.Reset();                 await botData.FlushAsync(default(CancellationToken));             }              //var client = new ConnectorClient(new Uri(activity.ServiceUrl));             //var clearMsg = activity.CreateReply();             //clearMsg.Text = $"Reseting everything for conversation: {activity.Conversation.Id}";             //await client.Conversations.SendToConversationAsync(clearMsg);         }     } }
