@@ -30,6 +30,7 @@ namespace HajjBot.Forms
         public static IForm<AmbulanceForm> BuildForm()
         {
             var newForm = new FormBuilder<AmbulanceForm>()
+                .AddRemainingFields()
                     .Message("Your location has been determined , We are on our way to you")
                     .Build();
 
