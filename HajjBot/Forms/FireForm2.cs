@@ -9,7 +9,7 @@ namespace HajjBot.Forms
     [Serializable]
     public class FireForm2
     {
-        [Prompt("Can you tell me how  many injuries are there ?  {||}")]
+        [Prompt("Can you tell me how  many injuries there are?  {||}")]
         public ConfirmationEN? Confirm { get; set; }
 
         public static IForm<FireForm2> BuildForm()

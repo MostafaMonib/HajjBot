@@ -34,17 +34,17 @@ namespace HajjBot.Forms
         [Prompt("Is this your first Hajj? {||}")]
         public ConfirmationEN? HajjBefore { get; set; }
 
-        [Prompt("Did you know what is conditions of Hajj? {||}")]
+        [Prompt("Did you know the conditions to perform Hajj? {||}")]
         public ConfirmationEN? HajjConditions;
 
-        [Prompt("Are you Adult? {||}")]
+        [Prompt("Are you an Adult? {||}")]
         public ConfirmationEN? AreYouAdult { get; set; }
 
         [Prompt("What is your budget? {||}")]
         [Numeric(1, 10000000)]
         public Int32 Budget { get; set; }
 
-        [Prompt("Should I know about any health conditions? {||}")]
+        [Prompt("Do you have any serious health conditions? {||}")]
         public ConfirmationEN? HealthProblems { get; set; }
 
         [Prompt("Please, select your payment method? {||}")]

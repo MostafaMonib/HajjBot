@@ -19,7 +19,7 @@ namespace HajjBot.Forms
         {
             var newForm = new FormBuilder<FireForm1>()
                 .Field(nameof(ConfirmInjuries))    
-                .Message("We wish you a good Hajja and a great effort! 😊")
+                .Message("We wish you a good Hajj and gracious blessings! ♥")
                     .Build();
 
             return newForm;

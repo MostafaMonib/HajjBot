@@ -16,7 +16,7 @@ namespace HajjBot.Forms
         {
             var newForm = new FormBuilder<FireForm3>()
                     .Field(nameof(NumberOfInjuries))
-                    .Message("help is on the way")
+                    .Message("We have acquired your location, help is on the way")
                     .Build();
 
             return newForm;

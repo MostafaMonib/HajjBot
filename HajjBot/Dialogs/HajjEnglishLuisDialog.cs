@@ -14,7 +14,7 @@
         //{
         //}
 
-        [LuisIntent("")]         public async Task None(IDialogContext context, LuisResult result)         {             await context.PostAsync("I can't understant you!?, Please repeat what you said?");             context.Wait(MessageReceived);         }
+        [LuisIntent("")]         public async Task None(IDialogContext context, LuisResult result)         {             await context.PostAsync("I can't understand!?, Please repeat what you said?");             context.Wait(MessageReceived);         }
 
         [LuisIntent("EmergencyAmbulance")]         public async Task EmergencyAmbulanceIntent(IDialogContext context, LuisResult result)         {
             var form = new FormDialog<AmbulanceForm>(new AmbulanceForm(), AmbulanceForm.BuildForm, FormOptions.PromptInStart, null);
@@ -42,7 +42,7 @@
             {
             }
 
-            await context.PostAsync($"Thanks! for using Hajj ChatBot!... {fname}");
+            await context.PostAsync($"Thanks! for using Hajj Bot!... {fname}");
         }
 
         #region Test
@@ -122,4 +122,4 @@
         }           [LuisIntent("EmergencyPolice")]         public async Task EmergencyPoliceIntent(IDialogContext context, LuisResult result)         {
             var form = new FormDialog<PoliceForm1>(new PoliceForm1(), PoliceForm1.BuildForm, FormOptions.PromptInStart, null);
             context.Call(form, LastDialog);
-        }           [LuisIntent("Greeting")]         public async Task GreetingIntent(IDialogContext context, LuisResult result)         {             await context.PostAsync("Alsallam Alykom, You are in the right place. Hajj Bot will help you in your spiritual journey? 😉");              context.Wait(MessageReceived);         }        } }
+        }           [LuisIntent("Greeting")]         public async Task GreetingIntent(IDialogContext context, LuisResult result)         {             await context.PostAsync("You are in the right place. Hajj Bot will help you in your spiritual journey? ");              context.Wait(MessageReceived);         }        } }
