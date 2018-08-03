@@ -1,8 +1,12 @@
-﻿using Microsoft.Bot.Connector;
+﻿using Autofac;
+using Microsoft.Bot.Builder.Dialogs;
+using Microsoft.Bot.Builder.Dialogs.Internals;
+using Microsoft.Bot.Connector;
 using System;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace HajjBot.Helper
@@ -36,7 +40,17 @@ namespace HajjBot.Helper
 
             return null;
         }
+        public async Task Reset(Activity activity)         {
+            //await activity.GetStateClient().BotState
+            //    .DeleteStateForUserWithHttpMessagesAsync(activity.ChannelId, activity.From.Id);
 
+            using (var scope = DialogModule.BeginLifetimeScope(Conversation.Container, activity))             {                 var botData = scope.Resolve<IBotData>();                 await botData.LoadAsync(default(CancellationToken));                 var stack = scope.Resolve<IDialogStack>();                 stack.Reset();                 await botData.FlushAsync(default(CancellationToken));             }
+
+            //var client = new ConnectorClient(new Uri(activity.ServiceUrl));
+            //var clearMsg = activity.CreateReply();
+            //clearMsg.Text = $"Reseting everything for conversation: {activity.Conversation.Id}";
+            //await client.Conversations.SendToConversationAsync(clearMsg);
+        } 
 
     }
 }

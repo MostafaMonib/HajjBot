@@ -12,59 +12,50 @@ using System.Threading.Tasks;
 
 namespace HajjBot.Forms
 {
-    public enum Confirmation
+    public enum ConfirmationAR
     {
         نعم,
         لا,
     }
 
-    public enum PaymentType
+    public enum PaymentTypeAR
     { فيزا, كاش };
 
 
     [Serializable]
-    public class HajjChecker
+    public class HajjChecker_ar
     {
         [Prompt("ماهو اسمك؟ {||}")]
         public string Name { get; set; }
 
         [Prompt("هل حجيت من قبل؟ {||}")]
-        public Confirmation? HajjBefore { get; set; }
+        public ConfirmationAR? HajjBefore { get; set; }
 
         [Prompt("هل تعلم ماهي شروط الحج؟ {||}")]
-        public Confirmation? HajjConditions;
+        public ConfirmationAR? HajjConditions;
 
         [Prompt("هل انت بالغ؟ {||}")]
-        public Confirmation? AreYouAdult { get; set; }
+        public ConfirmationAR? AreYouAdult { get; set; }
 
         [Prompt("ماهي ميزانيتك؟ {||}")]
         [Numeric(1, 10000000)]
         public Int32 Budget { get; set; }
 
         [Prompt("هل تعاني من مشاكل صحية؟ {||}")]
-        public Confirmation? HealthProblems { get; set; }
+        public ConfirmationAR? HealthProblems { get; set; }
 
         [Prompt("من فضلك قم بتحديد طريقة الدفع؟ {||}")]
-        public PaymentType? PaymentType;
+        public PaymentTypeAR? PaymentType;
 
         [Prompt("هل تريد التأكيد و الاستمرار؟ {||}")]
-        public Confirmation? Confirmation;
+        public ConfirmationAR? Confirmation;
 
-        public static IForm<HajjChecker> BuildForm()
+        public static IForm<HajjChecker_ar> BuildForm()
         {
-            var newForm = new FormBuilder<HajjChecker>()
+            var newForm = new FormBuilder<HajjChecker_ar>()
                     .Message("السلام عليكم, انت فى المكان المناسب الحج بوت سيساعدك في رحلتك الروحانية")
-                    //.Confirm("Do you want to countinue booking an hotel? (Yes/No)")
-                    .Field(nameof(HajjBefore))
-                    //.Field(nameof(RoomType))
-                    .Field(nameof(HajjConditions))
-                    .Field(nameof(HajjConditions))
-                    .Field(nameof(AreYouAdult))
-                    .Field(nameof(Budget))
-                    .Field(nameof(HealthProblems))
-                    .Field(nameof(PaymentType))
-                    .AddRemainingFields()
-                    .Field(nameof(Confirmation), validate: ValidateConfirmation)
+                    //.Field(nameof(HajjBefore))
+                    .Field(nameof(HajjConditions), validate: ValidateHajjConditionAsync)
                     .OnCompletion(async (context, state) =>
                     {
                         Common.CommonConversation.CurruntDialogContext = context;
@@ -77,24 +68,28 @@ namespace HajjBot.Forms
             return newForm;
         }
 
-        private static Task<ValidateResult> ValidateConfirmation(HajjChecker state, object response)
+        private static async Task<ValidateResult> ValidateHajjConditionAsync(HajjChecker_ar state, object response)
         {
             var result = new ValidateResult();
-            var confirm = Enum.GetName(typeof(Confirmation), (Confirmation)response);
-            // Do the checks here whether the time is available. 
-            // Hard coded for demo purposes
+            var confirm = Enum.GetName(typeof(ConfirmationAR), (ConfirmationAR)response);
             if (confirm == "نعم")
             {
                 result.IsValid = true;
                 result.Value = response;
+                result.Feedback = "هل أنت مسلم وبالغ؟";
             }
             else
             {
                 result.IsValid = false;
-                result.Value = response;
+                result.Value = false;
+                //await new HajjHelper().Reset(null);
+                result.Feedback = "شكرا لك ولا يمكنك اكمال العملية ";
+                
             }
-            return Task.FromResult(result);
+            return await Task.FromResult(result);
+            
         }
+        
     }
 
 
