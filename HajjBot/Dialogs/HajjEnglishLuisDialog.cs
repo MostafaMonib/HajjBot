@@ -89,10 +89,10 @@
                 var form = new FormDialog<FireForm2>(new FireForm2(), FireForm2.BuildForm, FormOptions.PromptInStart, null);
                 context.Call(form, ToFireForm3Async);
             }
-            else
-            {
-                await new HajjHelper().Reset(activity: Common.CommonConversation.CurrentActivity);
-            }
+            //else
+            //{
+            //    await new HajjHelper().Reset(activity: Common.CommonConversation.CurrentActivity);
+            //}
            
         }
 
@@ -105,10 +105,10 @@
                 var form = new FormDialog<FireForm3>(new FireForm3(), FireForm3.BuildForm, FormOptions.PromptInStart, null);
                 context.Call(form, LastDialog);
             }
-            else
-            {
-                await new HajjHelper().Reset(activity: Common.CommonConversation.CurrentActivity);
-            }
+            //else
+            //{
+            //    await new HajjHelper().Reset(activity: Common.CommonConversation.CurrentActivity);
+            //}
         }
 
         #endregion

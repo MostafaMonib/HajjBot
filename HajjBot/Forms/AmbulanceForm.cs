@@ -9,7 +9,7 @@ namespace HajjBot.Forms
     public enum AmbulanceTypes
     {
         Normal,
-        Ssvere,
+        Severe,
         Very_Servere,
     };
 
@@ -23,12 +23,14 @@ namespace HajjBot.Forms
         public int? Injuries { get; set; }
 
         [Prompt("Can you specify age? {||}")]
+        [Describe("Answer with 'No' to skip this question.")]
+        [Optional]
         public int? Age { get; set; }
 
         public static IForm<AmbulanceForm> BuildForm()
         {
             var newForm = new FormBuilder<AmbulanceForm>()
-                    .Message("")
+                    .Message("Your location has been determined , We are on our way to you")
                     .Build();
 
             return newForm;
